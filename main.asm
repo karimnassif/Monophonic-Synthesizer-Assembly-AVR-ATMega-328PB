@@ -20,8 +20,8 @@
 
 .org 0x0000		rjmp setup
 
-.org 0x001C		;rjmp ISR_SAW
-				rjmp ISR_TriSine					;Comment out to choose waveform
+.org 0x001C		rjmp ISR_SAW
+				;rjmp ISR_TriSine					;Comment out to choose waveform
 
 .org 0x002A		rjmp ISR_ADC
 
@@ -77,12 +77,12 @@ setup:			ldi io_set, 0xFF
 				out TCCR0A, workhorse
 				ldi workhorse, 0b00000010
 				sts TIMSK0, workhorse				;enable overflow interrupt
-				ldi workhorse, 0x00
+				ldi workhorse, 0b00000000
 				sts OCR0A, workhorse				;setting timer to 0
 				sei									;enabling interrupts
-				;rjmp sawtooth						;uncomment rjmp statement of waveform you wish to generate
-				rjmp tri_Inc
-				;rjmp sine
+				rjmp sawtooth						;uncomment rjmp statement of waveform you wish to generate (as well as appropriate ISR above)
+				;rjmp tri_Inc
+				;rjmp sine_Init
 
 
 //Sawtooth Waveform 'Method'//
