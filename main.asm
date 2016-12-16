@@ -21,7 +21,7 @@
 .org 0x0000		rjmp setup
 
 .org 0x001C		rjmp ISR_SAW
-				;rjmp ISR_TriSine					;Comment out to choose waveform
+			;rjmp ISR_TriSine					;Comment out to choose waveform
 
 .org 0x002A		rjmp ISR_ADC
 
@@ -64,9 +64,9 @@ sine_array:		.db 128,131,134,137,140,143,146,149,152,156,159,162,165,168,171,174
 
 
 
-setup:			ldi io_set, 0xFF
-				out DDRD, io_set					;initial output to PORTD
-				ldi output, 0						;initializing output (the register I feed to PORTD)
+setup:				ldi io_set, 0xFF
+				out DDRD, io_set				;initial output to PORTD
+				ldi output, 0					;initializing output (the register I feed to PORTD)
 				ldi workhorse, 0b11101111		
 				sts ADCSRA, workhorse				;enables ADC, ADC Interrupt, and sets the prescalar
 				ldi workhorse, 0b01100101		
@@ -79,44 +79,44 @@ setup:			ldi io_set, 0xFF
 				sts TIMSK0, workhorse				;enable overflow interrupt
 				ldi workhorse, 0b00000000
 				sts OCR0A, workhorse				;setting timer to 0
-				sei									;enabling interrupts
-				rjmp sawtooth						;uncomment rjmp statement of waveform you wish to generate (as well as appropriate ISR above)
+				sei						;enabling interrupts
+				rjmp sawtooth					;uncomment rjmp statement of waveform you wish to generate (as well as appropriate ISR above)
 				;rjmp tri_Inc
 				;rjmp sine_Init
 
 
 //Sawtooth Waveform 'Method'//
 
-sawtooth:		out PORTD, output
+sawtooth:			out PORTD, output
 				rjmp sawtooth
 
 //Triangle Waveform 'Method'//
 				
-tri_Inc:		set_Pointer ZL,ZH, triangle_Inc*2	;macro stores triangle_Inc array into Z
+tri_Inc:			set_Pointer ZL,ZH, triangle_Inc*2		;macro stores triangle_Inc array into Z
 				ldi count, 0
 				rjmp tri_Loop
 				
-tri_Loop:		out PORTD, output					;Since 255 values are being loaded for the wave, count goes from 1-255
-				cpi count, 255						;At 255 the decrementing loop is called to avoid overflow
+tri_Loop:			out PORTD, output				;Since 255 values are being loaded for the wave, count goes from 1-255
+				cpi count, 255					;At 255 the decrementing loop is called to avoid overflow
 				breq tri_Dec_Init
 				rjmp tri_Loop
 
-tri_Dec_Init:	set_Pointer ZL,ZH, triangle_Dec*2	;macro stores triangleDec array into Z
+tri_Dec_Init:			set_Pointer ZL,ZH, triangle_Dec*2		;macro stores triangleDec array into Z
 				ldi count, 0
 				rjmp tri_Dec
 
-tri_Dec:		out PORTD, output					;the same process as triLoop but inversed
+tri_Dec:			out PORTD, output				;the same process as triLoop but inversed
 				cpi count, 255
 				breq tri_Inc
 				rjmp tri_Dec
 
 //Sine Waveform 'Method'//
 
-sine_Init:		set_Pointer ZL,ZH, sine_array*2
+sine_Init:			set_Pointer ZL,ZH, sine_array*2
 				ldi count, 0
 				rjmp sine_loop
 
-sine_loop:		out PORTD, output
+sine_loop:			out PORTD, output
 				cpi count, 255
 				breq sine_Init
 				rjmp sine_loop
@@ -124,7 +124,7 @@ sine_loop:		out PORTD, output
 
 //Interrupt Service Routine for Sawtooth//
 
-ISR_SAW:		push workhorse			;Setting up the ISR.
+ISR_SAW:			push workhorse				;Setting up the ISR.
 				in workhorse, SREG		
 				push workhorse
 				inc output				;The part that actually makes a sawtooth wave.
@@ -135,16 +135,16 @@ ISR_SAW:		push workhorse			;Setting up the ISR.
 
 //Interrupt Service Routine for Triangle and Sine Waves//
 
-ISR_TriSine:	lds workhorse, SREG		;Setting up the ISR.
+ISR_TriSine:			lds workhorse, SREG			;Setting up the ISR.
 				push workhorse
-				lpm output, Z+			;Gives output the next value in the array then moves forward one (with the array being each element, ordered)
+				lpm output, Z+				;Gives output the next value in the array then moves forward one (with the array being each element, ordered)
 				inc count				;Count is used to return to beginning of sine wave, or to switch to decrementing portion of triangle waveform
 				pop workhorse
 				sts SREG, workhorse	
 				reti
 
 
-ISR_ADC:		lds workhorse, SREG		;Setting up the ADC portion of the ISR
+ISR_ADC:			lds workhorse, SREG			;Setting up the ADC portion of the ISR
 				push workhorse
 				lds workhorse, ADCH
 				out OCR0A, workhorse
