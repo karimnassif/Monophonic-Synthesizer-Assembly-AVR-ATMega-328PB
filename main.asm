@@ -65,10 +65,10 @@ sine_array:		.db 128,131,134,137,140,143,146,149,152,156,159,162,165,168,171,174
 
 
 setup:				ldi io_set, 0xFF
-				out DDRD, io_set				;initial output to PORTD
+				out DDRD, io_set				
 				ldi output, 0					;initializing output (the register I feed to PORTD)
 				ldi workhorse, 0b11101111		
-				sts ADCSRA, workhorse				;enables ADC, ADC Interrupt, and sets the prescalar
+				sts ADCSRA, workhorse				;enables ADC and the ADC Interrupt
 				ldi workhorse, 0b01100101		
 				sts ADMUX, workhorse				;setting up the ADC/picking ADC 2
 				ldi workhorse, 0b00000011		
